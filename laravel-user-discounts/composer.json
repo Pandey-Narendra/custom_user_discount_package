@@ -21,7 +21,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Acme\\UserDiscounts\\": "src/"
+            "Acme\\UserDiscounts\\": "src/",
+            "Acme\\UserDiscounts\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {

@@ -189,6 +189,7 @@ class ComposerStaticInitd4a11066d9d7fe4b8aeb32ee199cd6ab
         'A' =>
         array (
             'Acme\\UserDiscounts\\Tests\\' => 25,
+            'Acme\\UserDiscounts\\Database\\Factories\\' => 38,
             'Acme\\UserDiscounts\\' => 19,
         ),
     );
@@ -543,6 +544,10 @@ class ComposerStaticInitd4a11066d9d7fe4b8aeb32ee199cd6ab
         'Acme\\UserDiscounts\\Tests\\' =>
         array (
             0 => __DIR__ . '/../..' . '/tests',
+        ),
+        'Acme\\UserDiscounts\\Database\\Factories\\' =>
+        array (
+            0 => __DIR__ . '/../..' . '/database/factories',
         ),
         'Acme\\UserDiscounts\\' =>
         array (

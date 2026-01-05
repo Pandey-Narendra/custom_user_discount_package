@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "../laravel-user-discounts",
-                "reference": "2aec7f6c78eb1cd39bdcc89e2e9fc4476816b9e6"
+                "reference": "5cf0b8d74a16fb27359a7a5f336dd345002f30b2"
             },
             "require": {
                 "illuminate/support": "^12.0",
@@ -32,7 +32,8 @@
             },
             "autoload": {
                 "psr-4": {
-                    "Acme\\UserDiscounts\\": "src/"
+                    "Acme\\UserDiscounts\\": "src/",
+                    "Acme\\UserDiscounts\\Database\\Factories\\": "database/factories/"
                 }
             },
             "autoload-dev": {

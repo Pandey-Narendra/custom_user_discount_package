@@ -92,5 +92,6 @@ return array(
     'Carbon\\' => array($vendorDir . '/nesbot/carbon/src/Carbon'),
     'Brick\\Math\\' => array($vendorDir . '/brick/math/src'),
     'Acme\\UserDiscounts\\Tests\\' => array($baseDir . '/tests'),
+    'Acme\\UserDiscounts\\Database\\Factories\\' => array($baseDir . '/database/factories'),
     'Acme\\UserDiscounts\\' => array($baseDir . '/src'),
 );

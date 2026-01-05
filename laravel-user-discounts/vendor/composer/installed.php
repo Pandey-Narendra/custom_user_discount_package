@@ -3,7 +3,7 @@
         'name' => 'acme/laravel-user-discounts',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '92bb89fd9762685477b3b0642ac8b5be92b8b0ca',
+        'reference' => 'a95a207ec51c8abc65069fcccda21cb8fa47a1ee',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'acme/laravel-user-discounts' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '92bb89fd9762685477b3b0642ac8b5be92b8b0ca',
+            'reference' => 'a95a207ec51c8abc65069fcccda21cb8fa47a1ee',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
