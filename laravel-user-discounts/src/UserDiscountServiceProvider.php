@@ -30,6 +30,14 @@ class UserDiscountServiceProvider extends BaseServiceProvider
                 fn (string $modelName) => 'Acme\\UserDiscounts\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
             );
         }
+
+        // Optional: Register a listener
+        $this->app->booted(function () {
+            \Illuminate\Support\Facades\Event::listen(
+                DiscountAssigned::class,
+                SendDiscountAssignedNotification::class
+            );
+        });
     }
 
     public function register(): void
