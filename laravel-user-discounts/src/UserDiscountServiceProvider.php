@@ -26,18 +26,18 @@ class UserDiscountServiceProvider extends BaseServiceProvider
 
         // Register factories for package models (handles custom namespace)
         if (class_exists(Factory::class)) {
-            Factory::guessFactoryNamesUsing(
-                fn (string $modelName) => 'Acme\\UserDiscounts\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
-            );
+            // Factory::guessFactoryNamesUsing(
+            //     fn (string $modelName) => 'Acme\\UserDiscounts\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
+            // );
         }
 
         // Optional: Register a listener
-        $this->app->booted(function () {
-            \Illuminate\Support\Facades\Event::listen(
-                DiscountAssigned::class,
-                SendDiscountAssignedNotification::class
-            );
-        });
+        // $this->app->booted(function () {
+        //     \Illuminate\Support\Facades\Event::listen(
+        //         DiscountAssigned::class,
+        //         SendDiscountAssignedNotification::class
+        //     );
+        // });
     }
 
     public function register(): void

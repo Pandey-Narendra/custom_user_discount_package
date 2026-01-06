@@ -23,7 +23,7 @@ class UserDiscountService
     public function assign(User $user, Discount $discount): UserDiscount
     {
         // Validate: discount must be active
-        if (! $discount->scopeActive(new Discount())->where('id', $discount->id)->exists()) {
+        if (! Discount::active()->where('id', $discount->id)->exists() ) {
             throw new UserDiscountException("Discount '{$discount->code}' is not active or has expired.");
         }
 
@@ -97,7 +97,7 @@ class UserDiscountService
     public function eligibleFor(User $user, Discount $discount): bool
     {
         // Discount must be active
-        if (! $discount->scopeActive(new Discount())->where('id', $discount->id)->exists()) {
+        if (! Discount::active()->where('id', $discount->id)->exists() ) {
             return false;
         }
 
