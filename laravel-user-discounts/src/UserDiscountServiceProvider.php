@@ -16,14 +16,33 @@ class UserDiscountServiceProvider extends BaseServiceProvider
             $this->publishes([
                 __DIR__.'/../database/migrations' => database_path('migrations'),
             ], 'user-discounts-migrations');
+            
+            $this->publishes([
+                __DIR__.'/../config/user-discounts.php' => config_path('user-discounts.php'),
+            ], 'user-discounts-config');
+
+
+            // Publish factories (for testing/dev)
+            $this->publishes([
+                __DIR__.'/../database/factories' => database_path('factories'),
+            ], ['user-discounts-factories']);
+
+            // Optional: Publish views (e.g., for customizable email templates if added later)
+            $this->publishes([
+                __DIR__.'/../resources/views' => resource_path('views/vendor/user-discounts'),
+            ], ['user-discounts-views', 'views']);
+
+            // Register commands
+            $this->commands([
+                \Acme\UserDiscounts\Commands\DiscountsListCommand::class,
+            ]);
+
+            $this->mergeConfigFrom(__DIR__.'/../config/user-discounts.php', 'user-discounts');
         }
 
-        $this->publishes([
-            __DIR__.'/../config/user-discounts.php' => config_path('user-discounts.php'),
-        ], 'user-discounts-config');
 
-        $this->mergeConfigFrom(__DIR__.'/../config/user-discounts.php', 'user-discounts');
-
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'user-discounts');
+        
         // Register factories for package models (handles custom namespace)
         if (class_exists(Factory::class)) {
             // Factory::guessFactoryNamesUsing(
@@ -47,5 +66,8 @@ class UserDiscountServiceProvider extends BaseServiceProvider
         });
 
         $this->app->alias(UserDiscountService::class, 'user-discounts');
+
+        // Merge config (defaults available even if not published)
+        $this->mergeConfigFrom(__DIR__.'/../config/user-discounts.php', 'user-discounts');
     }
 }
