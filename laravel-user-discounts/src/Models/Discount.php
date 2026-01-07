@@ -40,15 +40,44 @@ class Discount extends Model
     /**
      * Scope: Only active and currently valid discounts
      */
-    public function scopeActive($query)
+    // public function scopeActive($query)
+    // {
+    //     return $query->where('is_active', true)
+    //                  ->where('starts_at', '<=', now())
+    //                  ->where(function ($q) {
+    //                      $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
+    //                  });
+    // }
+
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true)
-                     ->where('starts_at', '<=', now())
-                     ->where(function ($q) {
-                         $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
-                     });
+                    ->where(function ($q) {
+                        $q->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+                    })
+                    ->where(function ($q) {
+                        $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
+                    });
     }
+/**
+ * Accessor: Is this discount currently active and valid?
+ */
+    public function getIsCurrentlyActiveAttribute(): bool
+    {
+        if (! $this->is_active) {
+            return false;
+        }
 
+        if ($this->starts_at && $this->starts_at->isFuture()) {
+            return false;
+        }
+
+        if ($this->ends_at && $this->ends_at->isPast()) {
+            return false;
+        }
+
+        return true;
+    }
     /**
      * Relationships
      */
