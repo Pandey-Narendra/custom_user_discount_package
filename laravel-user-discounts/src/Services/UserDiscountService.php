@@ -9,13 +9,14 @@ use Acme\UserDiscounts\Exceptions\UserDiscountException;
 use Acme\UserDiscounts\Models\Discount;
 use Acme\UserDiscounts\Models\DiscountAudit;
 use Acme\UserDiscounts\Models\UserDiscount;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Config;
-use App\Models\User;
 use Exception;
 
 class UserDiscountService
@@ -23,7 +24,7 @@ class UserDiscountService
     /**
      * Assign a discount to a user (idempotent)
      */
-    public function assign(User $user, Discount $discount): ?UserDiscount
+    public function assign(Authenticatable $user, Discount $discount): ?UserDiscount
     {
         try {
             // Validate inputs
@@ -83,7 +84,7 @@ class UserDiscountService
             });
 
         } catch (UserDiscountException $e) {
-            throw $e; // Re-throw known business exceptions
+            throw $e;
         } catch (Exception $e) {
             Log::error('Unexpected error in discount assignment', [
                 'user_id' => $user?->id,
@@ -97,7 +98,7 @@ class UserDiscountService
     /**
      * Revoke a discount from a user (idempotent)
      */
-    public function revoke(User $user, Discount $discount): void
+    public function revoke(Authenticatable $user, Discount $discount): void
     {
         try {
             if (!$user || !$discount) {
@@ -111,11 +112,11 @@ class UserDiscountService
                     ->first();
             } catch (Exception $e) {
                 Log::warning('Error finding assignment for revocation', ['exception' => $e]);
-                return; // Nothing to revoke
+                return;
             }
 
             if (!$userDiscount) {
-                return; // Already revoked or never assigned
+                return;
             }
 
             DB::transaction(function () use ($user, $discount, $userDiscount) {
@@ -135,21 +136,19 @@ class UserDiscountService
 
         } catch (Exception $e) {
             Log::error('Unexpected error in discount revocation', ['exception' => $e]);
-            // Do not throw — revocation failure shouldn't break the app
         }
     }
 
     /**
      * Check if user is eligible for a specific discount
      */
-    public function eligibleFor(User $user, Discount $discount): bool
+    public function eligibleFor(Authenticatable $user, Discount $discount): bool
     {
         try {
             if (!$user || !$discount) {
                 return false;
             }
 
-            // Check discount active status safely
             try {
                 $isActive = Discount::active()->where('id', $discount->id)->exists();
             } catch (Exception $e) {
@@ -161,7 +160,6 @@ class UserDiscountService
                 return false;
             }
 
-            // Check assignment
             try {
                 $assignment = $user->userDiscounts()
                     ->where('discount_id', $discount->id)
@@ -185,9 +183,9 @@ class UserDiscountService
     }
 
     /**
-     * Apply eligible discounts to a subtotal
+     * Apply eligible discounts to a subtotal — with proper sequential stacking
      */
-    public function apply(User $user, float $subtotal): array
+    public function apply(Authenticatable $user, float $subtotal): array
     {
         if ($subtotal <= 0 || !$user) {
             return ['total_discount' => 0.0, 'applied' => collect()];
@@ -200,12 +198,13 @@ class UserDiscountService
                 return ['total_discount' => 0.0, 'applied' => collect()];
             }
 
+            $remainingSubtotal = $subtotal;
             $totalDiscount = 0.0;
             $applied = collect();
             $precision = Config::get('user-discounts.rounding_precision', 2);
             $maxCap = Config::get('user-discounts.max_percentage_cap', 1.0);
 
-            DB::transaction(function () use ($eligibleAssignments, $subtotal, &$totalDiscount, &$applied, $precision, $maxCap) {
+            DB::transaction(function () use ($eligibleAssignments, &$remainingSubtotal, &$totalDiscount, &$applied, $precision, $maxCap, $user) {
                 foreach ($eligibleAssignments as $assignment) {
                     try {
                         $assignment->refresh()->lockForUpdate();
@@ -220,8 +219,9 @@ class UserDiscountService
                             continue;
                         }
 
-                        $discountAmount = ($discount->percentage / 100) * $subtotal;
-                        $cappedAmount = min($discountAmount, $subtotal * $maxCap);
+                        // Calculate on CURRENT remaining subtotal
+                        $discountAmount = ($discount->percentage / 100) * $remainingSubtotal;
+                        $cappedAmount = min($discountAmount, $remainingSubtotal * $maxCap);
                         $roundedAmount = round($cappedAmount, $precision);
 
                         if ($roundedAmount <= 0) {
@@ -240,14 +240,15 @@ class UserDiscountService
                         ]);
 
                         $totalDiscount += $roundedAmount;
+                        $remainingSubtotal -= $roundedAmount;  // ← Critical: reduce remaining
 
                         $this->createAudit('apply', $assignment->user_id, $discount->id, $oldUsage, $newUsage);
 
                         event(new DiscountApplied(
-                            $assignment->user,
+                            $user,
                             $discount,
                             $roundedAmount,
-                            $subtotal - $totalDiscount + $roundedAmount
+                            $remainingSubtotal + $roundedAmount  // subtotal before this discount
                         ));
 
                     } catch (Exception $e) {
@@ -255,7 +256,6 @@ class UserDiscountService
                             'assignment_id' => $assignment->id ?? null,
                             'exception' => $e
                         ]);
-                        // Continue with next discount — don't break entire apply
                         continue;
                     }
                 }
@@ -275,7 +275,7 @@ class UserDiscountService
     /**
      * Get ordered eligible assignments with full error resilience
      */
-    protected function getEligibleAssignments(User $user): \Illuminate\Database\Eloquent\Collection
+    protected function getEligibleAssignments(Authenticatable $user): Collection
     {
         try {
             $stackingOrder = Config::get('user-discounts.stacking_order', []);
@@ -302,7 +302,7 @@ class UserDiscountService
 
         } catch (Exception $e) {
             Log::error('Error retrieving eligible assignments', ['exception' => $e]);
-            return collect(); // Safe empty collection
+            return collect();
         }
     }
 
@@ -328,7 +328,6 @@ class UserDiscountService
                 'discount_id' => $discountId,
                 'exception' => $e
             ]);
-            // Audit failure should NEVER break core functionality
         }
     }
 }

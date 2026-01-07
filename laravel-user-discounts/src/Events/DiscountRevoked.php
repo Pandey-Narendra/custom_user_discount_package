@@ -4,7 +4,7 @@ namespace Acme\UserDiscounts\Events;
 
 use Acme\UserDiscounts\Models\Discount;
 use Acme\UserDiscounts\Models\UserDiscount;
-use App\Models\User;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -13,7 +13,7 @@ class DiscountRevoked
     use Dispatchable, SerializesModels;
 
     public function __construct(
-        public User $user,
+        public Authenticatable $user,
         public Discount $discount,
         public UserDiscount $userDiscount
     ) {}

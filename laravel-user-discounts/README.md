@@ -9,32 +9,56 @@ This package follows Laravel best practices: PSR-4 autoloading, Eloquent models,
 
 ## Features
 
-# User-Specific Discounts: 
-    Assign/revoke discounts per user.
-# Deterministic Stacking: 
-    Apply discounts in a configurable order with caps and rounding.
-# Usage Enforcement:
-     Per-user limits; concurrency-safe increments.
-# Auditing: 
-    Logs all actions (assign, revoke, apply) with IP for security.
-# Events: 
-    Dispatch events for extensibility (e.g., notifications).
-# Scopes and Accessors: 
-    Easy querying for active/not revoked discounts; remaining uses.
-# Idempotency: 
-    Safe to call operations multiple times.
-# Concurrency Safety: 
-    DB transactions + row locking.
-# CLI Command:
-    php artisan discounts:list for listing discounts.
+- **User-Specific Discounts** – Assign and revoke discounts on a per-user basis.
+- **Sequential Deterministic Stacking** – Discounts are applied one after another on the **remaining subtotal** (e.g., 20% → then 10% on remaining amount = correct compounding).
+- **Configurable Stacking Order** – Define exact application order via discount codes.
+- **Maximum Discount Cap** – Limit total discount percentage across all applied discounts.
+- **Per-User Usage Limits** – Enforce how many times a user can use a discount.
+- **Concurrency Safe** – Uses database transactions and row-level locking (`lockForUpdate()`) to prevent race conditions.
+- **Comprehensive Auditing** – Every action (assign, revoke, apply) is logged with IP address, old/new usage, and timestamp.
+- **Events** – Fully dispatchable, queueable events for integration (emails, notifications, webhooks).
+- **Idempotent Operations** – Safe to call assign/revoke multiple times without side effects.
+- **Smart Scopes & Accessors** – `active()`, `notRevoked()`, `remaining_uses`, etc.
+- **CLI Tool** – `php artisan discounts:list` to view all discounts.
+- **Interactive Test Dashboard** – Beautiful live demo interface included.
+- **Fully Tested** – Includes passing unit tests covering all core logic.
+
+# File Structure
+    laravel-user-discounts/
+    ├── config/
+    │   └── user-discounts.php
+    ├── database/
+    │   ├── migrations/
+    │   └── factories/
+    ├── src/
+    │   ├── Commands/
+    │   ├── Events/
+    │   ├── Exceptions/
+    │   ├── Facades/
+    │   ├── Models/
+    │   ├── Services/
+    │   ├── Traits/
+    │   └── UserDiscountServiceProvider.php
+    ├── tests/
+    └── composer.json
+    
+    test-app/
+    ├── app/Http/Controllers/
+    │    └── DiscountTestController.php
+    ├── resources/views/
+    │    └── discounts-test.blade.php
+    ├── routes
+    └──  web.php
 
 ## Requirements
 
-PHP 8.1+
-Laravel 10+
+PHP 8.2+
+Laravel 12
 Composer
 
 ## Installation
+
+## test-app(inside laravel test-app)
 
 # Install via Composer:
     composer require acme/laravel-user-discounts(If developing locally: composer require acme/laravel-user-discounts
@@ -45,6 +69,7 @@ Composer
 
 # Run migrations to create tables (discounts, user_discounts, discount_audits):
     php artisan migrate
+    php artisan serve
     
 # (Recommended) Add the HasUserDiscounts trait to your User model for relationships:PHPuse Acme\UserDiscounts\Traits\HasUserDiscounts;
 
@@ -348,6 +373,21 @@ File Structure and What Each File Does
                 \App\Listeners\SendEmail::class,
             ],
         ];
+
+
+
+### Test Dashboard (Live Demo Included!)
+    This package includes a beautiful interactive test dashboard so you can see everything in action.
+
+    Visit http://your-app.test/ — you’ll see a full-featured dashboard where you can:
+   
+    Create discounts
+    Assign/revoke them
+    Apply to cart subtotals
+    See real-time calculation results
+    View full audit log with IP and usage changes
+
+
 
 # Contributing
     Fork, develop in modules, test, PR. Use semantic versioning.
