@@ -1,1 +1,1 @@
-{"version":2,"defects":{"Acme\\UserDiscounts\\Tests\\Unit\\DiscountApplicationTest::it_applies_discounts_correctly_with_stacking_and_usage_cap":8},"times":{"Acme\\UserDiscounts\\Tests\\Unit\\DiscountApplicationTest::it_applies_discounts_correctly_with_stacking_and_usage_cap":0.257}}
+{"version":2,"defects":{"Acme\\UserDiscounts\\Tests\\Unit\\DiscountApplicationTest::it_applies_discounts_correctly_with_stacking_and_usage_cap":8},"times":{"Acme\\UserDiscounts\\Tests\\Unit\\DiscountApplicationTest::it_applies_discounts_correctly_with_stacking_and_usage_cap":0.267}}

@@ -61,7 +61,7 @@ Composer
 ## test-app(inside laravel test-app)
 
 # Install via Composer:
-    composer require acme/laravel-user-discounts(If developing locally: composer require acme/laravel-user-discounts
+    composer require acme/laravel-user-discounts
 
 # Publish assets (config, migrations, factories):
     php artisan vendor:publish --provider="Acme\\UserDiscounts\\UserDiscountServiceProvider"
@@ -386,6 +386,13 @@ File Structure and What Each File Does
     Apply to cart subtotals
     See real-time calculation results
     View full audit log with IP and usage changes
+
+## UI Overview
+<img src="public/UI/image.png" alt="Dashboard Part 1" width="45%" />
+<img src="public/UI/image1.png" alt="Dashboard Part 2" width="45%" />
+<img src="public/UI/image2.png" alt="Dashboard Part 3" width="45%" />
+<img src="public/UI/image4.png" alt="Dashboard Part 4" width="45%" />
+
 
 
 
